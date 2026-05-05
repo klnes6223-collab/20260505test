@@ -1,0 +1,6 @@
+{
+  "name": "分組小幫手",
+  "description": "一個專業且美觀的隨機分組工具，支援固定組數或固定每組人數，並提供流暢的動態結果展示測試。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
