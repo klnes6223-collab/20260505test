@@ -39,7 +39,7 @@ interface HistoryItem {
   operator: string;
 }
 
-export default function App(分組器) {
+export default function App() {
   const [inputText, setInputText] = useState('');
   const [mode, setMode] = useState<GroupMode>('count');
   const [count, setCount] = useState<number>(2);
@@ -49,7 +49,7 @@ export default function App(分組器) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
-  const [currentOperator, setCurrentOperator] = useState<string>('系統管理員');
+  const [currentOperator, setCurrentOperator] = useState<string>('');
 
   const availableOperators = ['系統管理員', '艾蜜莉 (Emily)', '奧利佛 (Oliver)', '蘇菲亞 (Sophia)', '雅各 (Jacob)'];
 
@@ -402,22 +402,41 @@ export default function App(分組器) {
               </h1>
               
               {/* Identity Selector */}
-              <div className="pt-4 flex flex-col md:flex-row items-center gap-3">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">當前身分：</span>
+              <div className="pt-4 flex flex-col md:flex-row items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full animate-pulse ${currentOperator ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">當前操作者：</span>
+                </div>
                 <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
                   {availableOperators.map((op) => (
                     <button
                       key={op}
                       onClick={() => setCurrentOperator(op)}
-                      className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border ${
+                      className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border relative group ${
                         currentOperator === op 
                         ? 'bg-brand-accent/20 border-brand-accent text-brand-accent shadow-lg shadow-brand-accent/5' 
-                        : 'bg-white/5 border-white/5 text-gray-500 hover:text-gray-300'
+                        : 'bg-white/5 border-white/5 text-gray-500 hover:text-gray-300 hover:border-white/10'
                       }`}
                     >
                       {op}
+                      {currentOperator === op && (
+                        <motion.div
+                          layoutId="operator-active"
+                          className="absolute inset-0 border border-brand-accent rounded-xl"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
                     </button>
                   ))}
+                  {!currentOperator && (
+                    <motion.span 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="text-[10px] text-red-500/80 font-bold italic animate-pulse ml-2"
+                    >
+                      ← 請先選擇身分
+                    </motion.span>
+                  )}
                 </div>
               </div>
             </div>
@@ -520,15 +539,15 @@ export default function App(分組器) {
 
             <button
               onClick={handleGroup}
-              disabled={names.length === 0}
+              disabled={names.length === 0 || !currentOperator}
               className={`w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 text-white font-bold text-lg transition-all shadow-2xl relative overflow-hidden group active:scale-[0.98] ${
-                names.length === 0 
+                names.length === 0 || !currentOperator
                   ? 'bg-gray-800/50 cursor-not-allowed opacity-50 grayscale' 
                   : 'bg-gradient-to-r from-brand-accent to-brand-violet hover:shadow-brand-accent/30'
               }`}
             >
-              <Shuffle className={`w-6 h-6 transition-transform group-hover:rotate-180 duration-500`} />
-              Generate Magic
+              <Shuffle className={`w-6 h-6 transition-transform ${currentOperator ? 'group-hover:rotate-180' : ''} duration-500`} />
+              {!currentOperator ? '請先選擇身分以開始' : 'Generate Magic'}
             </button>
           </section>
 
@@ -867,7 +886,7 @@ export default function App(分組器) {
                             {item.names.length} 人 • {item.groups.length} 組
                           </div>
                           <div className="text-[10px] text-brand-accent font-bold px-2 py-1 bg-brand-accent/10 rounded-lg">
-                            BY {item.operator}
+                            BY {item.operator || '未知'}
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
